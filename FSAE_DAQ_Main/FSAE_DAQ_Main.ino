@@ -3,7 +3,7 @@
 File dataSD;
 
 // change this to match your SD shield or module;
-const int chipSelect = 4;
+const int chipSelect = 53;
 int runNumber;
 String strSDName;
 
@@ -30,7 +30,7 @@ void setup() {
   }
   Serial.println(strSDName);
   dataSD = SD.open(strSDName, FILE_WRITE); //, O_CREAT | O_WRITE);
-  dataSD.println("Time (s), Accel1X (g), Accel1Y, Accel1Z, Accel2X, Accel2Y, Accel2Z, Wheelspeed1 (mph), Wheelspeed2 (mph)");
+  dataSD.println("Time (s), Accel1X (g), Accel1Y, Accel1Z, Accel2X, Accel2Y, Accel2Z, AccelMainX, AccelMainY, AccelMainZ, Wheelspeed1 (mph), Wheelspeed2 (mph)");
   dataSD.close();
   
 }
@@ -53,26 +53,31 @@ const int R1_PIN = A4; // Slidepot 1 analog pin
 const int HE1_PIN = A8;
 const int HE2_PIN = A9; // Hall effect sensor #2 analog pin
 
-const int ACCEL1_X = A10;
-const int ACCEL1_Y = A14;
-const int ACCEL1_Z = A12;
-const int ACCEL2_X = A11;
-const int ACCEL2_Y = A15;
-const int ACCEL2_Z = A13;
+/**
+ * Accelerometer stuff
+ */
 
+ // ports
+const int ACCEL1_X = A2;
+const int ACCEL1_Y = A4;
+const int ACCEL1_Z = A6;
+const int ACCEL2_X = A10;
+const int ACCEL2_Y = A12;
+const int ACCEL2_Z = A14;
+const int ACCEL_MAIN_X = A11;
+const int ACCEL_MAIN_Y = A13;
+const int ACCEL_MAIN_Z = A15;
+
+// biases/weights
 const float BIAS_X_1 = -0.09;
 const float BIAS_Y_1 = 0.06;
 const float BIAS_Z_1 = -0.10;
 const float BIAS_X_2 = 0.00;
 const float BIAS_Y_2 = 0.03;
 const float BIAS_Z_2 = -0.10;
-
-float accel1X;
-float accel1Y;
-float accel1Z;
-float accel2X;
-float accel2Y;
-float accel2Z;
+const float BIAS_X_MAIN = 0.11;
+const float BIAS_Y_MAIN = 0.08;
+const float BIAS_Z_MAIN = 0.05;
 
 const float VOLTS_PER_G_X_1 = 0.329;
 const float VOLTS_PER_G_Y_1 = 0.331;
@@ -80,10 +85,42 @@ const float VOLTS_PER_G_Z_1 = 0.326;
 const float VOLTS_PER_G_X_2 = 0.329;
 const float VOLTS_PER_G_Y_2 = 0.336;
 const float VOLTS_PER_G_Z_2 = 0.326;
+const float VOLTS_PER_G_X_MAIN = 0.325;
+const float VOLTS_PER_G_Y_MAIN = 0.332;
+const float VOLTS_PER_G_Z_MAIN = 0.330;
+
+// values to store data
+float accel1X;
+float accel1Y;
+float accel1Z;
+float accel2X;
+float accel2Y;
+float accel2Z;
+
+
+
+
+/*
+ * potentiometer stuff
+ */
+const float POT_IN_CONVERSION_SCALE = .00210396;
+
+// ports
+const int linPot1Port = A1;
+const int linPot2Port = A3;
+const int linPot3Port = A5;
+const int linPot4Port = A7;
+
+
+// converts the raw potentiometer value into inches
+// potPort - analog port of the linear potentiometer
+float potToInch(const int potPort);
 
 const float RESOLUTION = 1023.0;
 const float RESOLUTION_3_3V = RESOLUTION * 3.3/5.0;
 const float WHEEL_CIRCUMFERENCE = 1.27674325; // in m
+
+
 
 void loop() {
   dataSD = SD.open(strSDName, FILE_WRITE);
@@ -136,7 +173,28 @@ void loop() {
   
   dataSD.print(accel2Z);
   dataSD.print(", ");
-
+  
+  accelMainX = BIAS_X_MAIN + ((analogRead(ACCEL_MAIN_X)/RESOLUTION_3_3V * 3.3 - 3.3/2)/VOLTS_PER_G_X_MAIN);
+  Serial.print("MAINX: ");
+  Serial.print(accelMainX);
+  
+  dataSD.print(accelMainX);
+  dataSD.print(", ");
+  
+  accelMainY = BIAS_Y_MAIN + ((analogRead(ACCEL_MAIN_Y)/RESOLUTION_3_3V * 3.3 - 3.3/2)/VOLTS_PER_G_Y_MAIN);
+  Serial.print(" Y: ");
+  Serial.print(accelMainY);
+  
+  dataSD.print(accelMainY);
+  dataSD.print(", ");
+  
+  accelMainZ = BIAS_Z_MAIN + ((analogRead(ACCEL_MAIN_Z)/RESOLUTION_3_3V * 3.3 - 3.3/2)/VOLTS_PER_G_Z_MAIN);
+  Serial.print(" Z: ");
+  Serial.println(accelMainZ);
+  
+  dataSD.print(accelMainZ);
+  dataSD.print(", ");
+  
   // Calculate frequency of hall effect sensor
   he1_value = analogRead(HE1_PIN);
   if ((he1_value < 10) && !justPassed1) { // Usually 1 or 0 when magnet near, >1000 if not
@@ -166,4 +224,12 @@ void loop() {
   dataSD.println(2.23694 * WHEEL_CIRCUMFERENCE * frequency2);
 
   dataSD.close();
+}
+
+float potToInch(const int potPort){
+  float position;
+  float valOfNegative = (analogRead(potPort)- 1010);
+  float positiveValue = abs(valOfNegative);
+  position = POT_IN_CONVERSION_SCALE * (positiveValue);
+  return position;
 }
