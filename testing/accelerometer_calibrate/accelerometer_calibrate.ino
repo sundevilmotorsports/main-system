@@ -24,7 +24,14 @@ const float VOLTS_PER_G_Z_2 = 0.326;
 const float RESOLUTION = 1023.0;
 const float RESOLUTION_3_3V = RESOLUTION * 3.3/5.0;
 
+// calibrating accelerometer 1 or 2
 bool accelOne = false;
+
+// using serial plotter or monitor
+bool plotter = false;
+
+
+
 void setup() {
   // put your setup code here, to run once:
   Serial.begin(9600);
@@ -39,7 +46,9 @@ void loop() {
   float calibratedY;
   float calibratedX;
   if(accelOne){
-    
+    calibratedZ = BIAS_Z_1 + ((rawZ/RESOLUTION_3_3V * 3.3 - 3.3/2)/VOLTS_PER_G_Z_1);
+    calibratedY = BIAS_Y_1 + ((rawY/RESOLUTION_3_3V * 3.3 - 3.3/2)/VOLTS_PER_G_Y_1);
+    calibratedX = BIAS_X_1 + ((rawX/RESOLUTION_3_3V * 3.3 - 3.3/2)/VOLTS_PER_G_X_1);
   }
   else{
     calibratedZ = BIAS_Z_2 + ((rawZ/RESOLUTION_3_3V * 3.3 - 3.3/2)/VOLTS_PER_G_Z_2);
@@ -47,11 +56,21 @@ void loop() {
     calibratedX = BIAS_X_2 + ((rawX/RESOLUTION_3_3V * 3.3 - 3.3/2)/VOLTS_PER_G_X_2);
   }
 
-  
-  Serial.print("x: ");
-  Serial.print(calibratedX);
-  Serial.print("\ty: ");
-  Serial.print(calibratedY);
-  Serial.print("\tz: ");
-  Serial.println(calibratedZ);
+  // for outputting to either serial plotter or monitor
+  if(plotter){
+    Serial.print(calibratedX);
+    Serial.print(" ");
+    Serial.print(calibratedY);
+    Serial.print(" ");
+    Serial.println(calibratedZ); 
+  }
+  else{
+    Serial.print("x: ");
+    Serial.print(calibratedX);
+    Serial.print("\ty: ");
+    Serial.print(calibratedY);
+    Serial.print("\tz: ");
+    Serial.println(calibratedZ);
+  }
+
 }
