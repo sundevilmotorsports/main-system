@@ -60,12 +60,12 @@ const int ACCEL2_X = A11;
 const int ACCEL2_Y = A15;
 const int ACCEL2_Z = A13;
 
-const float BIAS_X_1 = -.09;
+const float BIAS_X_1 = -0.09;
 const float BIAS_Y_1 = 0.06;
-const float BIAS_Z_1 = 0.05;
-const float BIAS_X_2 = -0.05;
-const float BIAS_Y_2 = 0.08;
-const float BIAS_Z_2 = 0.07;
+const float BIAS_Z_1 = -0.10;
+const float BIAS_X_2 = 0.00;
+const float BIAS_Y_2 = 0.03;
+const float BIAS_Z_2 = -0.10;
 
 float accel1X;
 float accel1Y;
@@ -77,9 +77,9 @@ float accel2Z;
 const float VOLTS_PER_G_X_1 = 0.329;
 const float VOLTS_PER_G_Y_1 = 0.331;
 const float VOLTS_PER_G_Z_1 = 0.326;
-const float VOLTS_PER_G_X_2 = 0.325;
-const float VOLTS_PER_G_Y_2 = 0.332;
-const float VOLTS_PER_G_Z_2 = 0.325;
+const float VOLTS_PER_G_X_2 = 0.329;
+const float VOLTS_PER_G_Y_2 = 0.336;
+const float VOLTS_PER_G_Z_2 = 0.326;
 
 const float RESOLUTION = 1023.0;
 const float RESOLUTION_3_3V = RESOLUTION * 3.3/5.0;
