@@ -30,7 +30,7 @@ void setup() {
   }
   Serial.println(strSDName);
   dataSD = SD.open(strSDName, FILE_WRITE); //, O_CREAT | O_WRITE);
-  dataSD.println("Time (s), Accel1X (g), Accel1Y, Accel1Z, Accel2X, Accel2Y, Accel2Z, AccelMainX, AccelMainY, AccelMainZ, Wheelspeed1 (mph), Wheelspeed2 (mph), LinPot1 (in), LinPot2 (in), LinPot3 (in), LinPot4 (in)");
+  dataSD.println("Time (s), Accel1X (g), Accel1Y, Accel1Z, Accel2X, Accel2Y, Accel2Z, AccelMainX, AccelMainY, AccelMainZ, Wheelspeed1 (mph), Wheelspeed2 (mph), LinPot1 (in), LinPot2 (in)");
   dataSD.close();
 
 }
@@ -237,17 +237,17 @@ void loop() {
   // get values
   float pot1Value = getLPotValue(linPot1Port);
   float pot2Value = getLPotValue(linPot2Port);
-  float pot3Value = getLPotValue(linPot3Port);
-  float pot4Value = getLPotValue(linPot4Port);
+  //float pot3Value = getLPotValue(linPot3Port);
+  //float pot4Value = getLPotValue(linPot4Port);
 
   // write stuff to sd card
   dataSD.print(pot1Value);
   dataSD.print(", ");
-  dataSD.print(pot2Value);
-  dataSD.print(", ");
-  dataSD.print(pot3Value);
-  dataSD.print(", ");
-  dataSD.println(pot4Value);
+  dataSD.println(pot2Value);
+  //dataSD.print(", ");
+  //dataSD.print(pot3Value);
+  //dataSD.print(", ");
+  //dataSD.println(pot4Value);
   
   dataSD.close();
 }
