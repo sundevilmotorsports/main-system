@@ -9,7 +9,7 @@ String strSDName;
 
 void setup() {
   Serial.begin(9600);
-  
+
   while (!Serial) {
     ; // wait for serial port to connect. Needed for native USB port only
   }
@@ -30,14 +30,14 @@ void setup() {
   }
   Serial.println(strSDName);
   dataSD = SD.open(strSDName, FILE_WRITE); //, O_CREAT | O_WRITE);
-  dataSD.println("Time (s), Accel1X (g), Accel1Y, Accel1Z, Accel2X, Accel2Y, Accel2Z, AccelMainX, AccelMainY, AccelMainZ, Wheelspeed1 (mph), Wheelspeed2 (mph)");
+  dataSD.println("Time (s), Accel1X (g), Accel1Y, Accel1Z, Accel2X, Accel2Y, Accel2Z, AccelMainX, AccelMainY, AccelMainZ, Wheelspeed1 (mph), Wheelspeed2 (mph), LinPot1 (in), LinPot2 (in), LinPot3 (in), LinPot4 (in)");
   dataSD.close();
-  
+
 }
 
 float resistance_1;
 float v1;
-int time_last1= 0; // Last time peak was detected for HE sensor 1
+int time_last1 = 0; // Last time peak was detected for HE sensor 1
 int time_last2 = 0; //       "           "        for HE sensor 2
 int time_curr1;
 int time_curr2;
@@ -54,10 +54,10 @@ const int HE1_PIN = A8;
 const int HE2_PIN = A9; // Hall effect sensor #2 analog pin
 
 /**
- * Accelerometer stuff
- */
+   Accelerometer stuff
+*/
 
- // ports
+// ports
 const int ACCEL1_X = A2;
 const int ACCEL1_Y = A4;
 const int ACCEL1_Z = A6;
@@ -96,13 +96,14 @@ float accel1Z;
 float accel2X;
 float accel2Y;
 float accel2Z;
-
-
+float accelMainX;
+float accelMainY;
+float accelMainZ;
 
 
 /*
- * potentiometer stuff
- */
+   potentiometer stuff
+*/
 const float POT_IN_CONVERSION_SCALE = .00210396;
 
 // ports
@@ -111,13 +112,19 @@ const int linPot2Port = A3;
 const int linPot3Port = A5;
 const int linPot4Port = A7;
 
-
-// converts the raw potentiometer value into inches
+// gets the raw potentiometer value and converts into inches
 // potPort - analog port of the linear potentiometer
-float potToInch(const int potPort);
+float getLPotValue(const int potPort) {
+  float position;
+  float valOfNegative = (analogRead(potPort) - 1010);
+  float positiveValue = abs(valOfNegative);
+  position = POT_IN_CONVERSION_SCALE * (positiveValue);
+  return position;
+}
+
 
 const float RESOLUTION = 1023.0;
-const float RESOLUTION_3_3V = RESOLUTION * 3.3/5.0;
+const float RESOLUTION_3_3V = RESOLUTION * 3.3 / 5.0;
 const float WHEEL_CIRCUMFERENCE = 1.27674325; // in m
 
 
@@ -128,73 +135,73 @@ void loop() {
   //v1 = analogRead(R1_PIN)/RESOLUTION * VOLTAGE_NOM;
   //resistance_1 = RESISTOR_1_10K_NOM * v1 / (VOLTAGE_NOM - v1);
   //Serial.println(resistance_1);
-  dataSD.print(millis()/1000.0); // Time in seconds
+  dataSD.print(millis() / 1000.0); // Time in seconds
   dataSD.print(", ");
   // Calculate acceleration
-  accel1X = BIAS_X_1 + ((analogRead(ACCEL1_X)/RESOLUTION_3_3V * 3.3 - 3.3/2)/VOLTS_PER_G_X_1);
+  accel1X = BIAS_X_1 + ((analogRead(ACCEL1_X) / RESOLUTION_3_3V * 3.3 - 3.3 / 2) / VOLTS_PER_G_X_1);
   //Serial.print("1X: ");
   //Serial.print(accel1X);
-  
+
   dataSD.print(accel1X);
   dataSD.print(", ");
-  
-  accel1Y = BIAS_Y_1 + ((analogRead(ACCEL1_Y)/RESOLUTION_3_3V * 3.3 - 3.3/2)/VOLTS_PER_G_Y_1);
+
+  accel1Y = BIAS_Y_1 + ((analogRead(ACCEL1_Y) / RESOLUTION_3_3V * 3.3 - 3.3 / 2) / VOLTS_PER_G_Y_1);
   //Serial.print(" Y: ");
   //Serial.print(accel1Y);
-  
+
   dataSD.print(accel1Y);
   dataSD.print(", ");
-  
-  accel1Z = BIAS_Z_1 + ((analogRead(ACCEL1_Z)/RESOLUTION_3_3V * 3.3 - 3.3/2)/VOLTS_PER_G_Z_1);
+
+  accel1Z = BIAS_Z_1 + ((analogRead(ACCEL1_Z) / RESOLUTION_3_3V * 3.3 - 3.3 / 2) / VOLTS_PER_G_Z_1);
   //Serial.print(" Z: ");
   //Serial.println(accel1Z);
-  
+
   dataSD.print(accel1Z);
   dataSD.print(", ");
 
-  
-  accel2X = BIAS_X_2 + ((analogRead(ACCEL2_X)/RESOLUTION_3_3V * 3.3 - 3.3/2)/VOLTS_PER_G_X_2);
+
+  accel2X = BIAS_X_2 + ((analogRead(ACCEL2_X) / RESOLUTION_3_3V * 3.3 - 3.3 / 2) / VOLTS_PER_G_X_2);
   //Serial.print("2X: ");
   //Serial.print(accel2X);
-  
+
   dataSD.print(accel2X);
   dataSD.print(", ");
-  
-  accel2Y = BIAS_Y_2 + ((analogRead(ACCEL2_Y)/RESOLUTION_3_3V * 3.3 - 3.3/2)/VOLTS_PER_G_Y_2);
+
+  accel2Y = BIAS_Y_2 + ((analogRead(ACCEL2_Y) / RESOLUTION_3_3V * 3.3 - 3.3 / 2) / VOLTS_PER_G_Y_2);
   //Serial.print(" Y: ");
   //Serial.print(accel2Y);
-  
+
   dataSD.print(accel2Y);
   dataSD.print(", ");
-  
-  accel2Z = BIAS_Z_2 + ((analogRead(ACCEL2_Z)/RESOLUTION_3_3V * 3.3 - 3.3/2)/VOLTS_PER_G_Z_2);
+
+  accel2Z = BIAS_Z_2 + ((analogRead(ACCEL2_Z) / RESOLUTION_3_3V * 3.3 - 3.3 / 2) / VOLTS_PER_G_Z_2);
   //Serial.print(" Z: ");
   //Serial.println(accel2Z);
-  
+
   dataSD.print(accel2Z);
   dataSD.print(", ");
-  
-  accelMainX = BIAS_X_MAIN + ((analogRead(ACCEL_MAIN_X)/RESOLUTION_3_3V * 3.3 - 3.3/2)/VOLTS_PER_G_X_MAIN);
+
+  accelMainX = BIAS_X_MAIN + ((analogRead(ACCEL_MAIN_X) / RESOLUTION_3_3V * 3.3 - 3.3 / 2) / VOLTS_PER_G_X_MAIN);
   Serial.print("MAINX: ");
   Serial.print(accelMainX);
-  
+
   dataSD.print(accelMainX);
   dataSD.print(", ");
-  
-  accelMainY = BIAS_Y_MAIN + ((analogRead(ACCEL_MAIN_Y)/RESOLUTION_3_3V * 3.3 - 3.3/2)/VOLTS_PER_G_Y_MAIN);
+
+  accelMainY = BIAS_Y_MAIN + ((analogRead(ACCEL_MAIN_Y) / RESOLUTION_3_3V * 3.3 - 3.3 / 2) / VOLTS_PER_G_Y_MAIN);
   Serial.print(" Y: ");
   Serial.print(accelMainY);
-  
+
   dataSD.print(accelMainY);
   dataSD.print(", ");
-  
-  accelMainZ = BIAS_Z_MAIN + ((analogRead(ACCEL_MAIN_Z)/RESOLUTION_3_3V * 3.3 - 3.3/2)/VOLTS_PER_G_Z_MAIN);
+
+  accelMainZ = BIAS_Z_MAIN + ((analogRead(ACCEL_MAIN_Z) / RESOLUTION_3_3V * 3.3 - 3.3 / 2) / VOLTS_PER_G_Z_MAIN);
   Serial.print(" Z: ");
   Serial.println(accelMainZ);
-  
+
   dataSD.print(accelMainZ);
   dataSD.print(", ");
-  
+
   // Calculate frequency of hall effect sensor
   he1_value = analogRead(HE1_PIN);
   if ((he1_value < 10) && !justPassed1) { // Usually 1 or 0 when magnet near, >1000 if not
@@ -204,8 +211,8 @@ void loop() {
   } else if (he1_value > 1000) {
     justPassed1 = false; // Reset
   }
-  frequency1 = 1000.0/(time_curr1-time_last1); // Frequency of magnet passing, Hz
-  
+  frequency1 = 1000.0 / (time_curr1 - time_last1); // Frequency of magnet passing, Hz
+
   he2_value = analogRead(HE2_PIN);
   if ((he2_value < 10) && !justPassed2) { // Usually 1 or 0 when magnet near, >1000 if not
     time_last2 = time_curr2;
@@ -214,22 +221,33 @@ void loop() {
   } else if (he2_value > 1000) {
     justPassed2 = false; // Reset
   }
-  frequency2 = 1000.0/(time_curr2-time_last2); // Frequency of magnet passing, Hz
+  frequency2 = 1000.0 / (time_curr2 - time_last2); // Frequency of magnet passing, Hz
   Serial.print(he1_value);
   Serial.print(" // ");
   Serial.println(2.23694 * WHEEL_CIRCUMFERENCE * frequency1); // Speed of car in mph
 
   dataSD.print(2.23694 * WHEEL_CIRCUMFERENCE * frequency1);
   dataSD.print(", ");
-  dataSD.println(2.23694 * WHEEL_CIRCUMFERENCE * frequency2);
+  dataSD.print(2.23694 * WHEEL_CIRCUMFERENCE * frequency2);
+  dataSD.print(", ");
 
+  /**
+   * potentiometer stuff
+   */
+  // get values
+  float pot1Value = getLPotValue(linPot1Port);
+  float pot2Value = getLPotValue(linPot2Port);
+  float pot3Value = getLPotValue(linPot3Port);
+  float pot4Value = getLPotValue(linPot4Port);
+
+  // write stuff to sd card
+  dataSD.print(pot1Value);
+  dataSD.print(", ");
+  dataSD.print(pot2Value);
+  dataSD.print(", ");
+  dataSD.print(pot3Value);
+  dataSD.print(", ");
+  dataSD.println(pot4Value);
+  
   dataSD.close();
-}
-
-float potToInch(const int potPort){
-  float position;
-  float valOfNegative = (analogRead(potPort)- 1010);
-  float positiveValue = abs(valOfNegative);
-  position = POT_IN_CONVERSION_SCALE * (positiveValue);
-  return position;
 }
