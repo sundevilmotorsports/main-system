@@ -131,71 +131,74 @@ const float WHEEL_CIRCUMFERENCE = 1.27674325; // in m
 
 void loop() {
   dataSD = SD.open(strSDName, FILE_WRITE);
-  // Calculate resistance across slidepot:
-  //v1 = analogRead(R1_PIN)/RESOLUTION * VOLTAGE_NOM;
-  //resistance_1 = RESISTOR_1_10K_NOM * v1 / (VOLTAGE_NOM - v1);
-  //Serial.println(resistance_1);
+
   dataSD.print(millis() / 1000.0); // Time in seconds
   dataSD.print(", ");
   // Calculate acceleration
   accel1X = BIAS_X_1 + ((analogRead(ACCEL1_X) / RESOLUTION_3_3V * 3.3 - 3.3 / 2) / VOLTS_PER_G_X_1);
-  //Serial.print("1X: ");
-  //Serial.print(accel1X);
 
   dataSD.print(accel1X);
   dataSD.print(", ");
 
   accel1Y = BIAS_Y_1 + ((analogRead(ACCEL1_Y) / RESOLUTION_3_3V * 3.3 - 3.3 / 2) / VOLTS_PER_G_Y_1);
-  //Serial.print(" Y: ");
-  //Serial.print(accel1Y);
 
   dataSD.print(accel1Y);
   dataSD.print(", ");
 
   accel1Z = BIAS_Z_1 + ((analogRead(ACCEL1_Z) / RESOLUTION_3_3V * 3.3 - 3.3 / 2) / VOLTS_PER_G_Z_1);
-  //Serial.print(" Z: ");
-  //Serial.println(accel1Z);
 
   dataSD.print(accel1Z);
   dataSD.print(", ");
 
 
   accel2X = BIAS_X_2 + ((analogRead(ACCEL2_X) / RESOLUTION_3_3V * 3.3 - 3.3 / 2) / VOLTS_PER_G_X_2);
-  //Serial.print("2X: ");
-  //Serial.print(accel2X);
 
   dataSD.print(accel2X);
   dataSD.print(", ");
 
   accel2Y = BIAS_Y_2 + ((analogRead(ACCEL2_Y) / RESOLUTION_3_3V * 3.3 - 3.3 / 2) / VOLTS_PER_G_Y_2);
-  //Serial.print(" Y: ");
-  //Serial.print(accel2Y);
 
   dataSD.print(accel2Y);
   dataSD.print(", ");
 
   accel2Z = BIAS_Z_2 + ((analogRead(ACCEL2_Z) / RESOLUTION_3_3V * 3.3 - 3.3 / 2) / VOLTS_PER_G_Z_2);
-  //Serial.print(" Z: ");
-  //Serial.println(accel2Z);
+
 
   dataSD.print(accel2Z);
   dataSD.print(", ");
 
   accelMainX = BIAS_X_MAIN + ((analogRead(ACCEL_MAIN_X) / RESOLUTION_3_3V * 3.3 - 3.3 / 2) / VOLTS_PER_G_X_MAIN);
-  Serial.print("MAINX: ");
-  Serial.print(accelMainX);
+
 
   dataSD.print(accelMainX);
   dataSD.print(", ");
 
   accelMainY = BIAS_Y_MAIN + ((analogRead(ACCEL_MAIN_Y) / RESOLUTION_3_3V * 3.3 - 3.3 / 2) / VOLTS_PER_G_Y_MAIN);
-  Serial.print(" Y: ");
-  Serial.print(accelMainY);
+
 
   dataSD.print(accelMainY);
   dataSD.print(", ");
 
   accelMainZ = BIAS_Z_MAIN + ((analogRead(ACCEL_MAIN_Z) / RESOLUTION_3_3V * 3.3 - 3.3 / 2) / VOLTS_PER_G_Z_MAIN);
+
+  Serial.print("1X: ");
+  Serial.print(accel1X);
+  Serial.print(" Y: ");
+  Serial.print(accel1Y);
+  Serial.print(" Z: ");
+  Serial.print(accel1Z);
+  
+  Serial.print("\t2X: ");
+  Serial.print(accel2X);
+  Serial.print(" Y: ");
+  Serial.print(accel2Y);
+  Serial.print(" Z: ");
+  Serial.print(accel2Z);
+  
+  Serial.print("\tMAINX: ");
+  Serial.print(accelMainX);
+  Serial.print(" Y: ");
+  Serial.print(accelMainY);
   Serial.print(" Z: ");
   Serial.println(accelMainZ);
 
@@ -222,9 +225,6 @@ void loop() {
     justPassed2 = false; // Reset
   }
   frequency2 = 1000.0 / (time_curr2 - time_last2); // Frequency of magnet passing, Hz
-  Serial.print(he1_value);
-  Serial.print(" // ");
-  Serial.println(2.23694 * WHEEL_CIRCUMFERENCE * frequency1); // Speed of car in mph
 
   dataSD.print(2.23694 * WHEEL_CIRCUMFERENCE * frequency1);
   dataSD.print(", ");
